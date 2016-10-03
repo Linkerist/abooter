@@ -1,0 +1,28 @@
+int gboot_main()
+{
+    unsigned char buf[2048];
+
+#ifdef MMU_ON
+    mmu_init();
+#endif
+    led_init();
+    button_init();
+    init_irq(); 
+    
+    NF_Erase(64*5+1);
+    
+    buf[0] = 100;
+    
+    NF_WritePage(64*5+1,buf); 
+    
+    buf[0] = 10;
+    
+    NF_PageRead(64*5+1,buf);
+    
+    
+    while(1);
+    
+    return 0;    
+}
+
+

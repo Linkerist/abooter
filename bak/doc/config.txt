@@ -1,0 +1,7 @@
+
+CROSS_COMPILE ?
+
+ARCH ?
+
+Board ?
+

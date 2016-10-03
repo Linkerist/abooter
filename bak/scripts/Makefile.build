@@ -1,0 +1,49 @@
+
+PHONY : __build
+__build :
+
+obj-y		:=
+subdir-y	:= 
+
+#include
+#include $(TOPDIR)/Makefile
+include Makefile
+
+__subdir-y	:=	$(patsubst %/,%,$(filter %/,$(obj-y)))
+subdir-y	+=	$(__subdir-y)
+
+#get objects in sub-directory
+subdir_objs	:=	$(foreach f,$(subdir-y),$(f)/built-in.o)
+
+#get objects in current directory
+cur_objs	:=	$(filter-out %/,$(obj-y))
+
+#include possible depentent files
+dep_files := $(wildcard $(foreach f,$(cur_objs),$(dir $(f)).$(notdir $(f)).d))
+ifneq ($(dep_files),)
+	include $(dep_files)
+endif
+
+#build sub-directory
+PHONY		+= $(subdir-y)
+
+__build : $(subdir-y) built-in.o
+
+$(subdir-y)	:
+	make -C $@ -f $(SRCTREE)/scripts/Makefile.build
+
+#pack the objects exist in current directory and sub-directory
+built-in.o	:	$(cur_objs) $(subdir_objs)
+	$(LD) -r -o $@ $^
+
+dep_file = .$@.d
+
+%.o : %.S
+	$(CC) $(CFLAGS) -Wp,-MD,$(dep_file) -c -o $@ $^
+
+%.o : %.c
+	$(CC) $(CFLAGS) -Wp,-MD,$(dep_file) -c -o $@ $^
+
+
+.PHONY		:	$(PHONY)
+

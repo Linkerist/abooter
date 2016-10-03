@@ -1,0 +1,1 @@
+bmp.o: bmp.c
